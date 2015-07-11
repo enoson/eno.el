@@ -90,5 +90,7 @@ you can write your own command based on eno by calling it with a regexp to match
   ("H-S-r". eno-word-paste-to-inline)
   ("H-S-s". eno-url-open)
   ("H-S-t". eno-clear-overlay)
-
 ```
+
+# license
+[MIT](http://opensource.org/licenses/MIT)
