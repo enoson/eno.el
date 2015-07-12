@@ -1,6 +1,5 @@
 # eno.el
-ace-jump/easymotion provides "goto certain char in view", which let us moving without mouse, but it's still not efficient or intuitive enough, so I create this package to "goto/copy/cut.. certain symbol/paren/l
-ine.. in view".
+ace-jump/easymotion provides "goto certain char in view", which let us moving without mouse, but it's still not efficient or intuitive enough, so I create this package to not just goto but also edit(copy,cut..) any word/symbol/string/paren/line in view by directly selecting hints, similar to ace-jump/easymotion but don't need to enter the leading char.
 
 # word
 ![image](https://cloud.githubusercontent.com/assets/13136462/8632037/c4f7c644-27bb-11e5-8bf3-a913cde94db9.png)
