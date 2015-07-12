@@ -65,43 +65,43 @@
   (setq all-letter-str str
         all-letter-n (length str)
         all-letter-list (delete "" (split-string str "")))
-  (gen-hints-pre-calculate))
+  (eno--gen-hints-pre-calculate))
 
 (defun eno-set-same-finger-list (list)
   (setq same-finger-list list)
-  (gen-hints-pre-calculate))
+  (eno--eno-gen-hints-pre-calculate))
 
-(defun gen-hints-pre-calculate ()
+(defun eno--gen-hints-pre-calculate ()
   (setq all-two-letter-hints nil
         all-max-hints-n (list all-letter-n))
   (--each all-letter-list
-      (add-all-two-letter-hints it)
-      (add-all-hints-max-n it)))
+    (eno--add-all-two-letter-hints it)
+    (eno--add-all-hints-max-n it)))
 
-(defun add-all-two-letter-hints (letter)
+(defun eno--add-all-two-letter-hints (letter)
   (let* ((same-finger (if same-finger-list
                           (--find (string-match-p (regexp-quote letter) it) same-finger-list)))
-         (same-finger-no-letter (remove-chars-from-str letter same-finger))
-         (all-letter-str-no-same (remove-chars-from-str same-finger-no-letter all-letter-str)))
+         (same-finger-no-letter (eno--remove-chars-from-str letter same-finger))
+         (all-letter-str-no-same (eno--remove-chars-from-str same-finger-no-letter all-letter-str)))
     (--each (string-to-list all-letter-str-no-same)
       (add-to-list 'all-two-letter-hints (concat letter (char-to-string it))))))
 
-(defun add-all-hints-max-n (letter)
+(defun eno--add-all-hints-max-n (letter)
   (let ((two-letter-hints-n-now (length all-two-letter-hints))
         (one-letter-hints-n-now (- all-letter-n (length all-max-hints-n))))
-    (append-list 'all-max-hints-n (+ two-letter-hints-n-now one-letter-hints-n-now))))
+    (eno--append-list 'all-max-hints-n (+ two-letter-hints-n-now one-letter-hints-n-now))))
 
-(defun remove-chars-from-str (chars str)
+(defun eno--remove-chars-from-str (chars str)
   (if (and chars str)
       (--each (delete "" (split-string chars ""))
         (setq str (replace-regexp-in-string (regexp-quote it) "" str))))
   str)
 
-(defun append-list (list el)
+(defun eno--append-list (list el)
   (add-to-list list el t))
 
 ;; generate
-(defun gen-hints (ovs-n)
+(defun eno--gen-hints (ovs-n)
   (let* ((two-letter-index (--find-index (<= ovs-n it) all-max-hints-n))
          (one-letter-n (- all-letter-n two-letter-index))
          (one-letter-hints (-slice all-letter-list two-letter-index))
@@ -111,7 +111,7 @@
     (list (append two-letter-hints one-letter-hints) one-letter-n)))
 
 ;; set
-(defun show-hints (ovs hints at-head aside)
+(defun eno--show-hints (ovs hints at-head aside)
   (--zip-with
    (let* ((beg (overlay-start it))
           (end (overlay-end it))
@@ -121,17 +121,17 @@
           (is-empty (= 0 ov-len))
           (chop-len (if (or aside is-empty) 0 (if is-one-letter 1 hint-len))))
      (if (and at-head (not is-empty))
-         (set-ov-hint it other (buffer-substring (+ beg chop-len) end) 'eno-hint-face)
-       (set-ov-hint it (buffer-substring beg (- end chop-len)) (propertize other 'face 'eno-hint-face))))
+         (eno--set-ov-hint it other (buffer-substring (+ beg chop-len) end) 'eno-hint-face)
+       (eno--set-ov-hint it (buffer-substring beg (- end chop-len)) (propertize other 'face 'eno-hint-face))))
    ovs hints))
 
-(defun set-ov-hint (ov head-str after-str &optional face)
+(defun eno--set-ov-hint (ov head-str after-str &optional face)
   (overlay-put ov 'display head-str)
   (overlay-put ov 'after-string after-str)
   (overlay-put ov 'face face))
 
 ;; select
-(defun select-hints (ovs hints one-letter-n at-head aside)
+(defun eno--select-hints (ovs hints one-letter-n at-head aside)
   (unwind-protect
       (let* ((letter-char-list (string-to-list all-letter-str))
              (key-seq (read-key-sequence-vector "eno:"))
@@ -140,20 +140,20 @@
         (princ (key-description key-seq))
         (cond
          ((equal (kbd "<escape>") key-seq) (keyboard-quit))
-         (key-idx (return-select-ov-beg-end))
+         (key-idx (eno--return-select-ov-beg-end))
          (t (call-interactively (key-binding key-seq))
             (when (-contains? eno-stay-key-list (key-description key-seq))
-              (clear-ovs ovs)
+              (eno--clear-ovs ovs)
               (if (boundp 're)
                   (eno re at-head aside)
                 (eno-line-select))
               ))))
-    (clear-ovs ovs)))
+    (eno--clear-ovs ovs)))
 
-(defun clear-ovs (ovs)
+(defun eno--clear-ovs (ovs)
   (--each ovs (delete-overlay it)))
 
-(defun return-select-ov-beg-end ()
+(defun eno--return-select-ov-beg-end ()
   (setq key-str (char-to-string key-char))
   (if (>= key-idx (- all-letter-n one-letter-n))
       (setq ov (elt ovs (-elem-index key-str hints)))
@@ -167,20 +167,20 @@
 ;; main
 (defun eno (re &optional at-head aside)
   "show matching regexp with hints then return the beginning and end of the selected hint(overlay)."
-  (let* ((v (view-bounds))
+  (let* ((v (eno-view-bounds))
          (beg (car v))
          (end (cdr v))
          (ovs (if (stringp re)
-                  (make-overlay-regexp re beg end)
-                (--mapcat (make-overlay-regexp it beg end) re))))
+                  (eno-make-overlay-regexp re beg end)
+                (--mapcat (eno-make-overlay-regexp it beg end) re))))
     (eno-ov-select ovs at-head aside)))
 
-(defun view-bounds ()
+(defun eno-view-bounds ()
   (save-excursion
     (cons (progn (move-to-window-line 0) (point))
           (progn (move-to-window-line -1) (point-at-eol)))))
 
-(defun make-overlay-regexp (re beg end)
+(defun eno-make-overlay-regexp (re beg end)
   (save-excursion
     (goto-char beg)
     (setq ovs)
@@ -192,13 +192,13 @@
   ovs)
 
 (defun eno-ov-select (ovs at-head aside)
-  (let* ((l (gen-hints (length ovs)))
+  (let* ((l (eno--gen-hints (length ovs)))
          (hints (car l))
          (one-letter-n (cadr l)))
-    (show-hints ovs hints at-head aside)
-    (select-hints ovs hints one-letter-n at-head aside)))
+    (eno--show-hints ovs hints at-head aside)
+    (eno--select-hints ovs hints one-letter-n at-head aside)))
 
-(defun eno-edit-regexp (regexp)
+(defun eno--edit-regexp (regexp)
   (-when-let* ((l (eno regexp at-head aside))
                (beg (car l))
                (end (cdr l)))
@@ -208,7 +208,7 @@
 
 ;; word
 (defun eno-word-edit (action &optional goto? at-head aside)
-  (eno-edit-regexp "\\w\\{2,\\}"))
+  (eno--edit-regexp "\\w\\{2,\\}"))
 
 (defun eno-word-goto ()
   (interactive)
@@ -229,7 +229,7 @@
 
 ;; word
 (defun eno-symbol-edit (action &optional goto? at-head aside)
-  (eno-edit-regexp "[^\s-(),;\n]\\{2,\\}"))
+  (eno--edit-regexp "[^\s-(),;\n]\\{2,\\}"))
 
 (defun eno-symbol-goto ()
   (interactive)
@@ -250,8 +250,8 @@
 
 ;; string
 (defun eno-str-edit (action &optional goto? at-head aside)
-  (eno-edit-regexp '("\'\\([^\\\'\n]\\|\\\\.\\)*\'"
-                     "\"\\([^\\\"\n]\\|\\\\.\\)*\"")))
+  (eno--edit-regexp '("\'\\([^\\\'\n]\\|\\\\.\\)*\'"
+                      "\"\\([^\\\"\n]\\|\\\\.\\)*\"")))
 
 (defun eno-str-goto ()
   (interactive)
@@ -403,7 +403,7 @@
 
 ;; to (inline)
 (defun eno-word-to-inline (action)
-  (setq b (eno-ov-select (make-overlay-regexp "\\w+" (point-at-bol) (point-at-eol)) nil nil)
+  (setq b (eno-ov-select (eno-make-overlay-regexp "\\w+" (point-at-bol) (point-at-eol)) nil nil)
         beg (car b)
         end (cdr b)
         p (point))
