@@ -1,4 +1,4 @@
-;;; eno.el --- goto/copy/cut.. word/symbol/line.. in view, kind of similar to ace-jump/easymotion
+;;; eno.el --- Goto/copy/cut any word/symbol/line in view, similar to ace-jump/easymotion
 
 ;; Author: <e.enoson@gmail.com>
 ;; URL: http://github.com/enoson/eno.el
