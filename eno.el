@@ -68,8 +68,8 @@
   (eno--gen-hints-pre-calculate))
 
 (defun eno-set-same-finger-list (list)
-  (setq eno-same-finger-list list)
-  (eno--eno-gen-hints-pre-calculate))
+  (setq same-finger-list list)
+  (eno--gen-hints-pre-calculate))
 
 (defun eno--gen-hints-pre-calculate ()
   (setq all-two-letter-hints nil
@@ -79,8 +79,8 @@
     (eno--add-all-hints-max-n it)))
 
 (defun eno--add-all-two-letter-hints (letter)
-  (let* ((same-finger (if eno-same-finger-list
-                          (--find (string-match-p (regexp-quote letter) it) eno-same-finger-list)))
+  (let* ((same-finger (if same-finger-list
+                          (--find (string-match-p (regexp-quote letter) it) same-finger-list)))
          (same-finger-no-letter (eno--remove-chars-from-str letter same-finger))
          (all-letter-str-no-same (eno--remove-chars-from-str same-finger-no-letter all-letter-str)))
     (--each (string-to-list all-letter-str-no-same)
@@ -506,7 +506,7 @@
     (t (:foreground "red")))
   "Face used for hints during selecting.")
 
-(setq eno-same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))
+(eno-set-same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))
 (eno-set-all-letter-str "e trinaodsuh(k[lgm,bpcyfvwjqz")
 (setq eno-stay-key-list '("<prior>" "<next>" "<wheel-up>" "<wheel-down>"))
 
