@@ -25,7 +25,7 @@ for qwerty: `(eno-set-all-letter-str " sdfjkla;weioqpruvncmghxz,./")`
 
 - `(eno-set-same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))`
 
-list of same finger letters, e.g. if you set it as '("qa" "ws"), then it won't generate the hint "qa", "aq", "ws" and "sw".
+list of same finger letters, e.g. if you set it as '("qa" "ws"), then the hint "qa", "aq", "ws" and "sw" won't show.
 
 for qwerty: `(eno-set-same-finger-list '("qaz" "wsx" "edc" "rfvg" "ujmhn" "ik," "ol." "p;/"))`
 
