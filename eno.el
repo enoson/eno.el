@@ -60,11 +60,15 @@
 (require 'dash)
 (require 'edit-at-point)
 
+
+(setq eno--all-letter-str nil
+      eno--all-letter-n nil
+      eno--all-letter-list nil)
 ;; init
 (defun eno-set-all-letter-str (str)
-  (setq all-letter-str str
-        all-letter-n (length str)
-        all-letter-list (delete "" (split-string str "")))
+  (setq eno--all-letter-str str
+        eno--all-letter-n (length str)
+        eno--all-letter-list (delete "" (split-string str "")))
   (eno--gen-hints-pre-calculate))
 
 (defun eno-set-same-finger-list (list)
@@ -73,8 +77,8 @@
 
 (defun eno--gen-hints-pre-calculate ()
   (setq all-two-letter-hints nil
-        all-max-hints-n (list all-letter-n))
-  (--each all-letter-list
+        all-max-hints-n (list eno--all-letter-n))
+  (--each eno--all-letter-list
     (eno--add-all-two-letter-hints it)
     (eno--add-all-hints-max-n it)))
 
@@ -82,13 +86,13 @@
   (let* ((same-finger (if same-finger-list
                           (--find (string-match-p (regexp-quote letter) it) same-finger-list)))
          (same-finger-no-letter (eno--remove-chars-from-str letter same-finger))
-         (all-letter-str-no-same (eno--remove-chars-from-str same-finger-no-letter all-letter-str)))
-    (--each (string-to-list all-letter-str-no-same)
+         (eno--all-letter-str-no-same (eno--remove-chars-from-str same-finger-no-letter eno--all-letter-str)))
+    (--each (string-to-list eno--all-letter-str-no-same)
       (add-to-list 'all-two-letter-hints (concat letter (char-to-string it))))))
 
 (defun eno--add-all-hints-max-n (letter)
   (let ((two-letter-hints-n-now (length all-two-letter-hints))
-        (one-letter-hints-n-now (- all-letter-n (length all-max-hints-n))))
+        (one-letter-hints-n-now (- eno--all-letter-n (length all-max-hints-n))))
     (eno--append-list 'all-max-hints-n (+ two-letter-hints-n-now one-letter-hints-n-now))))
 
 (defun eno--remove-chars-from-str (chars str)
@@ -103,8 +107,8 @@
 ;; generate
 (defun eno--gen-hints (ovs-n)
   (let* ((two-letter-index (--find-index (<= ovs-n it) all-max-hints-n))
-         (one-letter-n (- all-letter-n two-letter-index))
-         (one-letter-hints (-slice all-letter-list two-letter-index))
+         (one-letter-n (- eno--all-letter-n two-letter-index))
+         (one-letter-hints (-slice eno--all-letter-list two-letter-index))
          (two-letter-hints-n-neg (- one-letter-n ovs-n))
          (two-letter-hints (if (>= 0 two-letter-hints-n-neg)
                                (-slice all-two-letter-hints two-letter-hints-n-neg))))
@@ -133,7 +137,7 @@
 ;; select
 (defun eno--select-hints (ovs hints one-letter-n at-head aside)
   (unwind-protect
-      (let* ((letter-char-list (string-to-list all-letter-str))
+      (let* ((letter-char-list (string-to-list eno--all-letter-str))
              (key-seq (read-key-sequence-vector "eno:"))
              (key-char (aref key-seq 0))
              (key-idx (-elem-index key-char letter-char-list)))
@@ -155,13 +159,13 @@
 
 (defun eno--return-select-ov-beg-end ()
   (setq key-str (char-to-string key-char))
-  (if (>= key-idx (- all-letter-n one-letter-n))
+  (if (>= key-idx (- eno--all-letter-n one-letter-n))
       (setq ov (elt ovs (-elem-index key-str hints)))
     (let* ((key-char2 (read-char))
            (key-str2 (char-to-string key-char2)))
       (if (-elem-index key-char2 letter-char-list)
           (setq ov (elt ovs (-elem-index (concat key-str key-str2) hints)))
-        (princ "not in all-letter-str."))))
+        (princ "not in eno--all-letter-str."))))
   (if ov (cons (overlay-start ov) (overlay-end ov))))
 
 ;; main
@@ -507,7 +511,7 @@
   "Face used for hints during selecting.")
 
 (eno-set-same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))
-(eno-set-all-letter-str "e trinaodsuh(k[lgm,bpcyfvwjqz")
+(eno-set-eno--all-letter-str "e trinaodsuh(k[lgm,bpcyfvwjqz")
 (setq eno-stay-key-list '("<prior>" "<next>" "<wheel-up>" "<wheel-down>"))
 
 (provide 'eno)
