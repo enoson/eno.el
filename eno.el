@@ -61,10 +61,6 @@
 (require 'edit-at-point)
 
 ;; init
-(setq eno--all-letter-n nil
-      eno--all-letter-str nil
-      eno--all-letter-list nil)
-
 (defun eno-set-all-letter-str (str)
   (setq eno--all-letter-str str
         eno--all-letter-n (length str)
@@ -510,7 +506,7 @@
     (t (:foreground "red")))
   "Face used for hints during selecting.")
 
-(eno-set-same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))
+(setq eno--same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))
 (eno-set-all-letter-str "e trinaodsuh(k[lgm,bpcyfvwjqz")
 (setq eno-stay-key-list '("<prior>" "<next>" "<wheel-up>" "<wheel-down>"))
 
