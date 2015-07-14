@@ -511,7 +511,7 @@
   "Face used for hints during selecting.")
 
 (eno-set-same-finger-list '("(aq" "dtb" "sr," "lmjv" "gwpc" "uiy" "hnf" "koz["))
-(eno-set-eno--all-letter-str "e trinaodsuh(k[lgm,bpcyfvwjqz")
+(eno-set-all-letter-str "e trinaodsuh(k[lgm,bpcyfvwjqz")
 (setq eno-stay-key-list '("<prior>" "<next>" "<wheel-up>" "<wheel-down>"))
 
 (provide 'eno)
