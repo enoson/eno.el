@@ -2,7 +2,7 @@
 
 ;; Author: <e.enoson@gmail.com>
 ;; URL: http://github.com/enoson/eno.el
-;; Version: 1.0
+;; Version: 1.1
 ;; Package-requires: ((dash "2.9.0") (edit-at-point "1.0"))
 
 ;;; Commentary:
@@ -12,7 +12,6 @@
 ;; comment-to, comment-from-to : line
 
 ;; sample keybinding config:
-;; (require 'eno)
 ;; (require 'bind-key)
 ;; (bind-keys
 ;;   ("M-S-a". eno-word-goto)
@@ -54,7 +53,7 @@
 ;;   ("H-S-q". eno-word-cut-to-inline)
 ;;   ("H-S-r". eno-word-paste-to-inline)
 ;;   ("H-S-s". eno-url-open)
-;;   ("H-S-t". eno-clear-overlay)
+;;   ("H-S-t". eno-clear-overlay))
 
 ;;; Code:
 (require 'dash)
@@ -165,6 +164,7 @@
   (if ov (cons (overlay-start ov) (overlay-end ov))))
 
 ;; main
+;;;###autoload
 (defun eno (re &optional at-head aside)
   "show matching regexp with hints then return the beginning and end of the selected hint(overlay)."
   (let* ((v (eno-view-bounds))
@@ -210,18 +210,22 @@
 (defun eno-word-edit (action &optional goto? at-head aside)
   (eno--edit-regexp "\\w\\{2,\\}"))
 
+;;;###autoload
 (defun eno-word-goto ()
   (interactive)
   (eno-word-edit nil t))
 
+;;;###autoload
 (defun eno-word-cut ()
   (interactive)
   (eno-word-edit 'kill-region t))
 
+;;;###autoload
 (defun eno-word-copy ()
   (interactive)
   (eno-word-edit 'kill-ring-save))
 
+;;;###autoload
 (defun eno-word-paste ()
   (interactive)
   (if (eno-word-edit 'delete-region t)
@@ -231,18 +235,22 @@
 (defun eno-symbol-edit (action &optional goto? at-head aside)
   (eno--edit-regexp "[^\s-(),;\n]\\{2,\\}"))
 
+;;;###autoload
 (defun eno-symbol-goto ()
   (interactive)
   (eno-symbol-edit nil t))
 
+;;;###autoload
 (defun eno-symbol-cut ()
   (interactive)
   (eno-symbol-edit 'kill-region t))
 
+;;;###autoload
 (defun eno-symbol-copy ()
   (interactive)
   (eno-symbol-edit 'kill-ring-save))
 
+;;;###autoload
 (defun eno-symbol-paste ()
   (interactive)
   (if (eno-symbol-edit 'delete-region t)
@@ -253,18 +261,22 @@
   (eno--edit-regexp '("\'\\([^\\\'\n]\\|\\\\.\\)*\'"
                       "\"\\([^\\\"\n]\\|\\\\.\\)*\"")))
 
+;;;###autoload
 (defun eno-str-goto ()
   (interactive)
   (eno-str-edit nil t))
 
+;;;###autoload
 (defun eno-str-cut ()
   (interactive)
   (eno-str-edit 'kill-region t))
 
+;;;###autoload
 (defun eno-str-copy ()
   (interactive)
   (eno-str-edit 'kill-ring-save))
 
+;;;###autoload
 (defun eno-str-paste ()
   (interactive)
   (if (eno-str-edit 'delete-region t)
@@ -286,61 +298,72 @@
     (push (make-overlay we (point-at-eol)) ovs))
   (eno-ov-select ovs t nil))
 
-(defun eno-line-edit (action)
+(defun eno-line-edit (action goto?)
   (-when-let* ((l (eno-line-select))
                (beg (car l))
                (end (cdr l)))
-    (if (equal action 'goto-char)
-        (goto-char beg)
-      (funcall action beg end))))
+    (if goto? (goto-char beg))
+    (funcall action beg end)
+    t))
 
+;;;###autoload
 (defun eno-line-goto ()
   (interactive)
-  (eno-line-edit 'goto-char))
+  (eno-line-edit nil t))
 
+;;;###autoload
 (defun eno-line-cut ()
   (interactive)
-  (eno-line-edit 'kill-region))
+  (eno-line-edit 'kill-region t))
 
+;;;###autoload
 (defun eno-line-copy ()
   (interactive)
-  (eno-line-edit 'kill-ring-save))
+  (eno-line-edit 'kill-ring-save nil))
 
+;;;###autoload
 (defun eno-line-paste ()
   (interactive)
-  (if (eno-line-edit 'delete-region)
-      (yank)))
+  (eno-line-edit 'delete-region t)
+  (yank))
 
+;;;###autoload
 (defun eno-line-comment ()
   (interactive)
   (eno-line-edit 'comment-or-uncomment-region))
 
+;;;###autoload
 (defun eno-line-open ()
   (interactive)
   (if (eno-line-edit 'goto-char)
       (newline-and-indent)))
 
+;;;###autoload
 (defun eno-paren-goto ()
   (interactive)
   (-if-let* ((beg (car (eno '("(" "\\[" "{") t))))
       (goto-char beg)))
 
+;;;###autoload
 (defun eno-paren-copy ()
   (interactive)
   (save-excursion
     (eno-paren-goto)
     (edit-at-point-paren-copy)))
 
+;;;###autoload
 (defun eno-paren-cut ()
   (interactive)
   (eno-paren-goto)
   (edit-at-point-paren-cut))
 
+;;;###autoload
 (defun eno-paren-delete ()
   (interactive)
   (eno-paren-goto)
   (edit-at-point-paren-delete))
 
+;;;###autoload
 (defun eno-paren-paste ()
   (interactive)
   (eno-paren-goto)
@@ -360,22 +383,27 @@
 (defun eno-line-edit-to (edit)
   (eno-edit-to 'line (eno-line-select) edit))
 
+;;;###autoload
 (defun eno-line-comment-to ()
   (interactive)
   (eno-line-edit-to 'comment-or-uncomment-region))
 
+;;;###autoload
 (defun eno-line-copy-to ()
   (interactive)
   (eno-line-edit-to 'kill-ring-save))
 
+;;;###autoload
 (defun eno-line-cut-to ()
   (interactive)
   (eno-line-edit-to 'kill-region))
 
+;;;###autoload
 (defun eno-line-delete-to ()
   (interactive)
   (eno-line-edit-to 'delete-region))
 
+;;;###autoload
 (defun eno-line-paste-to ()
   (interactive)
   (eno-line-delete-to)
@@ -384,18 +412,22 @@
 (defun eno-symbol-edit-to (edit)
   (eno-edit-to 'symbol (eno "[^\s-(),;\n]\\{2,\\}" t) edit))
 
+;;;###autoload
 (defun eno-symbol-copy-to ()
   (interactive)
   (eno-symbol-edit-to 'kill-ring-save))
 
+;;;###autoload
 (defun eno-symbol-cut-to ()
   (interactive)
   (eno-symbol-edit-to 'kill-region))
 
+;;;###autoload
 (defun eno-symbol-delete-to ()
   (interactive)
   (eno-symbol-edit-to 'delete-region))
 
+;;;###autoload
 (defun eno-symbol-paste-to ()
   (interactive)
   (eno-symbol-delete-to)
@@ -413,18 +445,22 @@
         (funcall action p end))
     (goto-char end)))
 
+;;;###autoload
 (defun eno-word-goto-inline ()
   (interactive)
   (eno-word-to-inline nil))
 
+;;;###autoload
 (defun eno-word-copy-to-inline ()
   (interactive)
   (eno-word-to-inline 'kill-ring-save))
 
+;;;###autoload
 (defun eno-word-cut-to-inline ()
   (interactive)
   (eno-word-to-inline 'kill-region))
 
+;;;###autoload
 (defun eno-word-paste-to-inline ()
   (interactive)
   (eno-word-to-inline 'delete-region)
@@ -443,22 +479,27 @@
 (defun eno-line-edit-from-to (edit)
   (eno-edit-from-to (eno-line-select) (eno-line-select) edit))
 
+;;;###autoload
 (defun eno-line-comment-from-to ()
   (interactive)
   (eno-line-edit-from-to 'comment-or-uncomment-region))
 
+;;;###autoload
 (defun eno-line-copy-from-to ()
   (interactive)
   (eno-line-edit-from-to 'kill-ring-save))
 
+;;;###autoload
 (defun eno-line-cut-from-to ()
   (interactive)
   (eno-line-edit-from-to 'kill-region))
 
+;;;###autoload
 (defun eno-line-delete-from-to ()
   (interactive)
   (eno-line-edit-from-to 'delete-region))
 
+;;;###autoload
 (defun eno-line-paste-from-to ()
   (interactive)
   (eno-line-delete-from-to)
@@ -468,24 +509,29 @@
   (setq regexp "[^\s-(),;\n]\\{2,\\}")
   (eno-edit-from-to (eno regexp t) (eno regexp t) edit))
 
+;;;###autoload
 (defun eno-symbol-copy-from-to ()
   (interactive)
   (eno-symbol-edit-from-to 'kill-ring-save))
 
+;;;###autoload
 (defun eno-symbol-cut-from-to ()
   (interactive)
   (eno-symbol-edit-from-to 'kill-region))
 
+;;;###autoload
 (defun eno-symbol-delete-from-to ()
   (interactive)
   (eno-symbol-edit-from-to 'delete-region))
 
+;;;###autoload
 (defun eno-symbol-paste-from-to ()
   (interactive)
   (eno-symbol-delete-from-to)
   (yank))
 
 ;; spcial
+;;;###autoload
 (defun eno-url-open ()
   (interactive)
   (-when-let* ((beg (car (eno "([a-z]+://" t))))
@@ -493,6 +539,7 @@
       (goto-char beg)
       (browse-url-at-point))))
 
+;;;###autoload
 (defun eno-clear-overlay ()
   (interactive)
   (--each (overlays-in (point-min) (point-max))
