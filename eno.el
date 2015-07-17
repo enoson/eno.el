@@ -303,7 +303,7 @@
                (beg (car l))
                (end (cdr l)))
     (if goto? (goto-char beg))
-    (funcall action beg end)
+    (if action (funcall action beg end))
     t))
 
 ;;;###autoload
@@ -330,13 +330,15 @@
 ;;;###autoload
 (defun eno-line-comment ()
   (interactive)
-  (eno-line-edit 'comment-or-uncomment-region))
+  (eno-line-edit 'comment-or-uncomment-region nil))
 
 ;;;###autoload
-(defun eno-line-open ()
+(defun eno-line-return ()
+  "simulate return at line end"
   (interactive)
-  (if (eno-line-edit 'goto-char)
-      (newline-and-indent)))
+  (when (eno-line-edit nil t)
+    (end-of-line)
+    (setq unread-command-events (listify-key-sequence [return]))))
 
 ;;;###autoload
 (defun eno-paren-goto ()
