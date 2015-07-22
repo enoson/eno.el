@@ -532,6 +532,42 @@
   (eno-symbol-delete-from-to)
   (yank))
 
+(defun eno-swap (regexp &optional at-head aside)
+  (-when-let* ((l1 (eno regexp at-head aside))
+               (beg1 (car l1))
+               (end1 (cdr l1))
+               (str1 (buffer-substring beg1 end1))
+               (l2 (eno regexp at-head aside))
+               (beg2 (car l2))
+               (end2 (cdr l2))
+               (str2 (buffer-substring beg2 end2)))
+    (if (< beg1 beg2)
+        (setq beg3 beg1
+              end3 end1
+              str3 str1
+              beg1 beg2
+              end1 end2
+              str1 str2
+              beg2 str3
+              end2 end3
+              str2 beg3))
+    (goto-char beg1)
+    (delete-region beg1 end1)
+    (insert str2)
+    (goto-char beg2)
+    (delete-region beg2 end2)
+    (insert str1)))
+
+;;;###autoload
+(defun eno-word-swap ()
+  (interactive)
+  (eno-swap "\\w\\{2,\\}"))
+
+;;;###autoload
+(defun eno-symbol-swap ()
+  (interactive)
+  (eno-swap "[^\s-(),;\n]\\{2,\\}"))
+
 ;; spcial
 ;;;###autoload
 (defun eno-url-open ()
