@@ -183,7 +183,7 @@
 (defun eno-make-overlay-regexp (re beg end)
   (save-excursion
     (goto-char beg)
-    (setq ovs)
+    (setq ovs nil)
     (while (re-search-forward re end t)
       (unless (get-char-property (point) 'invisible)
         (push (make-overlay (match-beginning 0)
