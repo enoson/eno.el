@@ -3,7 +3,7 @@
 ;; Author: <e.enoson@gmail.com>
 ;; URL: http://github.com/enoson/eno.el
 ;; Version: 1.1
-;; Package-requires: ((dash "2.9.0") (edit-at-point "1.0"))
+;; Package-requires: ((dash "2.12.1") (edit-at-point "1.0"))
 
 ;;; Commentary:
 
@@ -79,7 +79,7 @@
 
 (defun eno--add-all-two-letter-hints (letter)
   (let* ((same-finger (if eno--same-finger-list
-                          (--find (string-match-p (regexp-quote letter) it) eno--same-finger-list)))
+                          (--first (string-match-p (regexp-quote letter) it) eno--same-finger-list)))
          (same-finger-no-letter (eno--remove-chars-from-str letter same-finger))
          (eno--all-letter-str-no-same (eno--remove-chars-from-str same-finger-no-letter eno--all-letter-str)))
     (--each (string-to-list eno--all-letter-str-no-same)
